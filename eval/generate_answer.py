@@ -163,13 +163,13 @@ async def main() -> None:
     parser.add_argument(
         "--pool_restart_rounds",
         type=int,
-        default=2,
+        default=0,
         help="When no progress for pool_no_progress_timeout, restart the async pool and rerun remaining tasks for this many extra rounds.",
     )
     parser.add_argument(
         "--max_retry_rounds",
         type=int,
-        default=10,
+        default=1,
         help="Maximum number of retry rounds to process queries without answers. After each round, check which queries still don't have answers and retry them. Set to 0 to disable auto-retry.",
     )
 

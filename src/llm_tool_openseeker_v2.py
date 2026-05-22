@@ -771,6 +771,8 @@ def call_llm_with_tool(item: Dict[str, Any], args, *, return_metrics: bool = Fal
     pending_assistant_prefix = ""
     _final_answer_retries = 0
     _MAX_FINAL_ANSWER_RETRIES = 3
+    finish_reason = "unknown"
+    error_info: Optional[Dict[str, Any]] = None
     while True:
         tools_for_render = [] if disable_tools else tools_all
         injected_prefix = pending_assistant_prefix
@@ -847,12 +849,29 @@ def call_llm_with_tool(item: Dict[str, Any], args, *, return_metrics: bool = Fal
             )
         
         if has_answer:
+            finish_reason = "answer"
             break
         
         if not tool_calls:
+            tool_count += 1
+            if tool_count >= tool_count_max:
+                finish_reason = "tool_count_limit_no_tool_or_answer"
+                error_info = {
+                    "type": "NoToolCallOrAnswerLimit",
+                    "message": (
+                        "The model repeatedly produced neither a final answer nor a valid tool call; "
+                        f"stopped after reaching tool_count_max={tool_count_max}."
+                    ),
+                }
+                break
             if disable_tools:
                 _final_answer_retries += 1
                 if _final_answer_retries >= _MAX_FINAL_ANSWER_RETRIES:
+                    finish_reason = "no_final_answer_after_tools_disabled"
+                    error_info = {
+                        "type": "NoFinalAnswerAfterToolsDisabled",
+                        "message": "Tools were disabled, but the model still did not output a final answer.",
+                    }
                     break
                 pending_assistant_prefix = (
                     "Tools are disabled. Do NOT output any <tool_calls_begin> tags. "
@@ -872,7 +891,11 @@ def call_llm_with_tool(item: Dict[str, Any], args, *, return_metrics: bool = Fal
                     {
                         "step": step_num,
                         "type": "tool_response",
-                        "content": {"content": error_content},
+                        "content": {
+                            "content": error_content,
+                            "counted_as_tool_call": True,
+                            "tool_count": tool_count,
+                        },
                     }
                 )
             continue
@@ -934,7 +957,13 @@ def call_llm_with_tool(item: Dict[str, Any], args, *, return_metrics: bool = Fal
                 break
 
     full_traj = _render_prompt(messages, tools_for_render, add_generation_prompt=False)
-    metrics = {"tool_calls": tool_count, "context_chars": len(full_traj)}
+    metrics = {
+        "tool_calls": tool_count,
+        "context_chars": len(full_traj),
+        "finish_reason": finish_reason,
+    }
+    if error_info is not None:
+        metrics["error"] = error_info
 
     if return_metrics:
         if return_trace:
@@ -1004,7 +1033,11 @@ def solve_query_with_tools(
         "elapsed_seconds": elapsed,
         "context_chars": context_chars,
         "context_est_tokens": _estimate_tokens_from_chars(context_chars),
+        "finish_reason": metrics.get("finish_reason", "unknown"),
     }
+    if metrics.get("error") is not None:
+        result["error"] = metrics.get("error")
+        result["answer"] = ""
     if return_full_traj:
         result["full_traj"] = full_traj
     if return_trace:

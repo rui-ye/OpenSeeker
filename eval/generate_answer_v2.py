@@ -186,13 +186,13 @@ async def main() -> None:
     parser.add_argument(
         "--pool_restart_rounds",
         type=int,
-        default=2,
+        default=0,
         help="When no progress for pool_no_progress_timeout, restart the async pool and rerun remaining tasks for this many extra rounds.",
     )
     parser.add_argument(
         "--max_retry_rounds",
         type=int,
-        default=10,
+        default=1,
         help="Maximum number of retry rounds to process queries without answers. After each round, check which queries still don't have answers and retry them. Set to 0 to disable auto-retry.",
     )
     parser.add_argument(
@@ -315,6 +315,9 @@ async def main() -> None:
             out["elapsed_seconds"] = res.get("elapsed_seconds", None)
             out["context_chars"] = res.get("context_chars", None)
             out["context_est_tokens"] = res.get("context_est_tokens", None)
+            out["finish_reason"] = res.get("finish_reason", None)
+            if res.get("error") is not None:
+                out["error"] = res.get("error")
             out["full_traj"] = res.get("full_traj", "")
             out["trace"] = res.get("trace", "")
             out["wall_seconds"] = time.time() - t0
