@@ -188,10 +188,10 @@ If you find OpenSeeker useful in your research, please consider citing:
 
 ### ⭐ Star History
 
-<a href="https://www.star-history.com/?repos=rui-ye%2FOpenSeeker&type=date&legend=top-left">
+<a href="https://star-history.dera.page/#PolarSeeker/OpenSeeker&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=rui-ye/OpenSeeker&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=rui-ye/OpenSeeker&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=rui-ye/OpenSeeker&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=PolarSeeker/OpenSeeker&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=PolarSeeker/OpenSeeker&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=PolarSeeker/OpenSeeker&type=date&legend=top-left" />
  </picture>
 </a>
